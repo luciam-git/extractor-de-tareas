@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Extractor de tareas</title>
+  <script src="/lib/pptxgen.bundle.js"></script>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --text: #1d2330;
+      --muted: #667085;
+      --border: #e3e6eb;
+      --accent: #3b5bdb;
+      --accent-hover: #2f4bc0;
+      --alta: #2b8a3e;   --alta-bg: #e6f4ea;
+      --media: #b26a00;  --media-bg: #fff4e0;
+      --baja: #c92a2a;   --baja-bg: #fdecec;
+      --error-bg: #fdecec;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #12151c;
+        --card: #1a1f29;
+        --text: #e6e8ec;
+        --muted: #98a0ae;
+        --border: #2b313d;
+        --accent: #6b8cff;
+        --accent-hover: #86a0ff;
+        --alta: #69db7c;   --alta-bg: #1e3326;
+        --media: #ffc35a;  --media-bg: #3a2e17;
+        --baja: #ff8787;   --baja-bg: #3b1f22;
+        --error-bg: #3b1f22;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    main { max-width: 1000px; margin: 0 auto; padding: 40px 16px 64px; }
+    h1 { font-size: 1.6rem; margin: 0 0 4px; }
+    .sub { color: var(--muted); margin: 0 0 28px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    label { display: block; font-weight: 600; font-size: .9rem; margin-bottom: 6px; }
+    textarea, input[type="date"] {
+      width: 100%;
+      font: inherit;
+      color: inherit;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    textarea { min-height: 260px; resize: vertical; }
+    textarea:focus, input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+    .row { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; margin-top: 16px; }
+    .row .field { flex: 0 1 220px; }
+    button {
+      font: inherit;
+      font-weight: 600;
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 18px;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+    }
+    button:hover:not(:disabled) { background: var(--accent-hover); }
+    button:disabled { opacity: .6; cursor: default; }
+    button.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    button.secondary:hover:not(:disabled) { background: var(--bg); }
+    .results-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+    .results-head h2 { font-size: 1.15rem; margin: 0; }
+    .result-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); font-weight: 600; }
+    td.fecha { white-space: nowrap; }
+    td.cita { color: var(--muted); font-style: italic; min-width: 220px; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .8rem; font-weight: 600; }
+    .badge.alta  { color: var(--alta);  background: var(--alta-bg); }
+    .badge.media { color: var(--media); background: var(--media-bg); }
+    .badge.baja  { color: var(--baja);  background: var(--baja-bg); }
+    .empty { color: var(--muted); text-align: center; padding: 28px 0; }
+    .error { background: var(--error-bg); color: var(--baja); border-radius: 8px; padding: 10px 14px; margin-top: 16px; }
+    .spinner {
+      display: inline-block; width: 14px; height: 14px; margin-right: 8px; vertical-align: -2px;
+      border: 2px solid rgba(255,255,255,.5); border-top-color: #fff; border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Extractor de tareas</h1>
+    <p class="sub">Pega la transcripción de una reunión y obtén las tareas, los responsables, las fechas límite y los pendientes sin asignar.</p>
+
+    <section class="card">
+      <label for="transcripcion">Transcripción</label>
+      <textarea id="transcripcion" placeholder="Pega aquí la transcripción de la reunión…"></textarea>
+
+      <div class="row">
+        <div class="field">
+          <label for="fecha">Fecha de la reunión</label>
+          <input type="date" id="fecha">
+        </div>
+        <button id="extraer">Extraer tareas</button>
+      </div>
+
+      <div id="error" class="error" hidden></div>
+    </section>
+
+    <section class="card" id="resultados" hidden>
+      <div class="results-head">
+        <h2>Tareas <span id="contador" class="sub"></span></h2>
+        <div class="result-actions">
+          <button id="copiar" class="secondary">Copiar resultados</button>
+          <div id="exportaciones" class="result-actions" hidden>
+            <button id="descargar-csv" class="secondary">Descargar CSV</button>
+            <button id="copiar-sheets" class="secondary">Copiar para Sheets</button>
+            <button id="descargar-pptx" class="secondary">Descargar PPTX</button>
+          </div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tarea</th>
+              <th>Responsable</th>
+              <th>Fecha límite</th>
+              <th>Certeza</th>
+              <th>Cita literal</th>
+            </tr>
+          </thead>
+          <tbody id="tabla"></tbody>
+        </table>
+      </div>
+      <div id="pendientes-wrap" hidden>
+        <h2>Pendientes sin asignar</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Descripción</th>
+                <th>Cita literal</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-pendientes"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const btn = $("extraer");
+    const btnCopiar = $("copiar");
+    const btnCsv = $("descargar-csv");
+    const btnSheets = $("copiar-sheets");
+    const btnPptx = $("descargar-pptx");
+    let tareas = [];
+    let pendientes = [];
+
+    // Fecha de hoy por defecto
+    const hoy = new Date();
+    $("fecha").value = new Date(hoy.getTime() - hoy.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+
+    function escapeHtml(s) {
+      return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+
+    function formatearFecha(f) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(f)) return f || "Sin fecha";
+      const [a, m, d] = f.split("-");
+      return `${d}/${m}/${a}`;
+    }
+
+    function mostrarError(msg) {
+      $("error").textContent = msg;
+      $("error").hidden = !msg;
+    }
+
+    function pintar() {
+      $("resultados").hidden = false;
+      $("contador").textContent = `(${tareas.length})`;
+      btnCopiar.disabled = tareas.length === 0;
+      $("exportaciones").hidden = tareas.length === 0 && pendientes.length === 0;
+
+      if (tareas.length === 0) {
+        $("tabla").innerHTML = `<tr><td colspan="5" class="empty">No se han encontrado tareas en la transcripción.</td></tr>`;
+      } else {
+        $("tabla").innerHTML = tareas.map((t) => {
+          const certeza = ["alta", "media", "baja"].includes(t.certeza) ? t.certeza : "media";
+          return `<tr>
+            <td>${escapeHtml(t.tarea)}</td>
+            <td>${escapeHtml(t.responsable)}</td>
+            <td class="fecha">${escapeHtml(formatearFecha(t.fecha_limite))}</td>
+            <td><span class="badge ${certeza}">${certeza}</span></td>
+            <td class="cita">“${escapeHtml(t.cita)}”</td>
+          </tr>`;
+        }).join("");
+      }
+
+      $("pendientes-wrap").hidden = pendientes.length === 0;
+      $("tabla-pendientes").innerHTML = pendientes.map((p) => `<tr>
+        <td>${escapeHtml(p.descripcion)}</td>
+        <td class="cita">“${escapeHtml(p.cita)}”</td>
+      </tr>`).join("");
+    }
+
+    btn.addEventListener("click", async () => {
+      const transcripcion = $("transcripcion").value.trim();
+      mostrarError("");
+      if (!transcripcion) {
+        mostrarError("Pega una transcripción antes de continuar.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner"></span>Analizando…`;
+
+      try {
+        const resp = await fetch("/api/extract", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ transcripcion, fecha: $("fecha").value }),
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(data.error || `Error ${resp.status}`);
+        tareas = Array.isArray(data.tareas) ? data.tareas : [];
+        pendientes = Array.isArray(data.pendientes) ? data.pendientes : [];
+        pintar();
+      } catch (e) {
+        mostrarError(e.message || "No se ha podido procesar la transcripción.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Extraer tareas";
+      }
+    });
+
+    btnCopiar.addEventListener("click", async () => {
+      const texto = tareas
+        .map((t) => `${t.tarea} · ${t.responsable} · ${formatearFecha(t.fecha_limite)}`)
+        .join("\n");
+      try {
+        await navigator.clipboard.writeText(texto);
+      } catch {
+        const ta = document.createElement("textarea");
+        ta.value = texto;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+      }
+      btnCopiar.textContent = "¡Copiado!";
+      setTimeout(() => (btnCopiar.textContent = "Copiar resultados"), 1500);
+    });
+
+    function fechaReunion() {
+      return $("fecha").value || "sin-fecha";
+    }
+
+    function descargar(blob, nombre) {
+      const enlace = document.createElement("a");
+      enlace.href = URL.createObjectURL(blob);
+      enlace.download = nombre;
+      enlace.click();
+      URL.revokeObjectURL(enlace.href);
+    }
+
+    function campoCsv(valor) {
+      return `"${String(valor ?? "").replace(/"/g, '""')}"`;
+    }
+
+    btnCsv.addEventListener("click", () => {
+      const filas = [
+        ["Tipo", "Tarea / descripción", "Responsable", "Fecha límite", "Certeza", "Cita literal"],
+        ...tareas.map((t) => ["Tarea", t.tarea, t.responsable, formatearFecha(t.fecha_limite), t.certeza, t.cita]),
+        ...pendientes.map((p) => ["Pendiente", p.descripcion, "", "", "", p.cita]),
+      ];
+      const csv = filas.map((fila) => fila.map(campoCsv).join(";")).join("\r\n");
+      descargar(new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }), `tareas-reunion-${fechaReunion()}.csv`);
+    });
+
+    btnSheets.addEventListener("click", async () => {
+      const filas = [
+        ["Tarea", "Responsable", "Fecha límite", "Certeza", "Cita literal"],
+        ...tareas.map((t) => [t.tarea, t.responsable, formatearFecha(t.fecha_limite), t.certeza, t.cita]),
+      ];
+      const texto = filas.map((fila) => fila.map((celda) => String(celda ?? "").replace(/[\t\r\n]+/g, " ")).join("\t")).join("\n");
+      try {
+        await navigator.clipboard.writeText(texto);
+      } catch {
+        const ta = document.createElement("textarea");
+        ta.value = texto;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+      }
+      btnSheets.textContent = "¡Copiado!";
+      setTimeout(() => (btnSheets.textContent = "Copiar para Sheets"), 1500);
+    });
+
+    function limpiarTextoPptx(valor) {
+      return String(valor ?? "").replace(/[\u0000-\u001F\u007F-\u009F\u00AD\u034F\u061C\u115F-\u1160\u17B4-\u17B5\u180B-\u180F\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFE00-\uFE0F\uFEFF]/g, "");
+    }
+
+    function agregarDiapositivasTabla(pptx, titulo, cabeceras, filas, anchos) {
+      const colW = cabeceras.map((_, indice) => {
+        const ancho = anchos[indice];
+        return Number.isFinite(ancho) && ancho > 0 ? ancho : 12.2 / cabeceras.length;
+      });
+      const paginas = [];
+      for (let inicio = 0; inicio < filas.length; inicio += 7) {
+        paginas.push(filas.slice(inicio, inicio + 7));
+      }
+      if (paginas.length === 0) paginas.push([]);
+
+      paginas.forEach((pagina, indice) => {
+        const slide = pptx.addSlide();
+        slide.addText(limpiarTextoPptx(indice === 0 ? titulo : `${titulo} (continuación)`), {
+          x: 0.55, y: 0.35, w: 12.2, h: 0.45, fontFace: "Aptos Display", fontSize: 24, bold: true, color: "1D2330",
+        });
+        if (pagina.length === 0) {
+          slide.addText(limpiarTextoPptx("No se han encontrado tareas."), {
+            x: 0.6, y: 1.15, w: 12, h: 0.4, fontFace: "Aptos", fontSize: 16, color: "667085",
+          });
+          return;
+        }
+        const tabla = [
+          cabeceras.map((valor) => ({ text: limpiarTextoPptx(valor), options: { bold: true, color: "FFFFFF", fill: { color: "3B5BDB" } } })),
+          ...pagina.map((fila) => cabeceras.map((_, columna) => ({
+            text: limpiarTextoPptx(fila[columna]),
+            options: { color: "1D2330" },
+          }))),
+        ];
+        slide.addTable(tabla, {
+          x: 0.55, y: 1.05, w: 12.2, colW, rowH: 0.62,
+          fontFace: "Aptos", fontSize: 12, color: "1D2330", margin: 0.1,
+          border: { type: "solid", color: "DDE2E8", pt: 0.75 },
+          valign: "middle",
+        });
+      });
+    }
+
+    btnPptx.addEventListener("click", async () => {
+      if (typeof window.PptxGenJS !== "function") {
+        mostrarError("No se ha podido cargar la biblioteca para crear el PPTX.");
+        return;
+      }
+      const pptx = new window.PptxGenJS();
+      pptx.layout = "LAYOUT_WIDE";
+      pptx.author = "Extractor de tareas";
+
+      const portada = pptx.addSlide();
+      portada.addText(limpiarTextoPptx("Resumen de reunión"), {
+        x: 0.8, y: 2.35, w: 11.7, h: 0.8, fontFace: "Aptos Display", fontSize: 34, bold: true, color: "1D2330", align: "center",
+      });
+      portada.addText(limpiarTextoPptx(fechaReunion()), {
+        x: 0.8, y: 3.25, w: 11.7, h: 0.45, fontFace: "Aptos", fontSize: 20, color: "667085", align: "center",
+      });
+
+      agregarDiapositivasTabla(
+        pptx,
+        "Tareas",
+        ["Tarea", "Responsable", "Fecha límite", "Certeza"],
+        tareas.map((t) => [t.tarea, t.responsable, formatearFecha(t.fecha_limite), t.certeza]),
+        [5.3, 2.5, 2.3, 2.1],
+      );
+      if (pendientes.length > 0) {
+        agregarDiapositivasTabla(
+          pptx,
+          "Pendientes sin asignar",
+          ["Descripción", "Cita literal"],
+          pendientes.map((p) => [p.descripcion, p.cita]),
+          [5.4, 6.8],
+        );
+      }
+      await pptx.writeFile({ fileName: `tareas-reunion-${fechaReunion()}.pptx` });
+    });
+  </script>
+</body>
+</html>
