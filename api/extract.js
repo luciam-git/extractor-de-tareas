@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 
 const client = new Anthropic(); // lee ANTHROPIC_API_KEY del entorno
 
-const MAX_CHARS = 400_000;
+const MAX_CHARS = 60_000;
 
 const SCHEMA = {
   type: "object",
@@ -47,13 +47,17 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Método no permitido" });
   }
 
-  const { transcripcion, fecha } = req.body || {};
+  const { transcripcion, fecha, codigo } = req.body || {};
+
+  if (!process.env.ACCESS_CODE || codigo !== process.env.ACCESS_CODE) {
+    return res.status(401).json({ error: "Código de acceso incorrecto." });
+  }
 
   if (typeof transcripcion !== "string" || !transcripcion.trim()) {
     return res.status(400).json({ error: "Falta la transcripción." });
   }
   if (transcripcion.length > MAX_CHARS) {
-    return res.status(400).json({ error: "La transcripción es demasiado larga." });
+    return res.status(413).json({ error: "La transcripción es demasiado larga" });
   }
   const fechaReunion =
     typeof fecha === "string" && /^\d{4}-\d{2}-\d{2}$/.test(fecha) ? fecha : null;

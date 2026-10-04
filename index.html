@@ -52,7 +52,7 @@
       margin-bottom: 24px;
     }
     label { display: block; font-weight: 600; font-size: .9rem; margin-bottom: 6px; }
-    textarea, input[type="date"] {
+    textarea, input[type="date"], input[type="text"] {
       width: 100%;
       font: inherit;
       color: inherit;
@@ -115,6 +115,9 @@
     <section class="card">
       <label for="transcripcion">Transcripción</label>
       <textarea id="transcripcion" placeholder="Pega aquí la transcripción de la reunión…"></textarea>
+
+      <label for="codigo">Código de acceso</label>
+      <input type="text" id="codigo" autocomplete="off">
 
       <div class="row">
         <div class="field">
@@ -242,7 +245,7 @@
         const resp = await fetch("/api/extract", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ transcripcion, fecha: $("fecha").value }),
+          body: JSON.stringify({ transcripcion, fecha: $("fecha").value, codigo: $("codigo").value }),
         });
         const data = await resp.json().catch(() => ({}));
         if (!resp.ok) throw new Error(data.error || `Error ${resp.status}`);
