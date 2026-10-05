@@ -86,6 +86,7 @@
     .results-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
     .results-head h2 { font-size: 1.15rem; margin: 0; }
     .result-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .demo-notice { color: var(--muted); font-size: .9rem; margin: 0 0 12px; }
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: .95rem; }
     th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
@@ -119,12 +120,16 @@
       <label for="codigo">Código de acceso</label>
       <input type="text" id="codigo" autocomplete="off">
 
+      <label for="participantes">Participantes (separados por comas)</label>
+      <input type="text" id="participantes" autocomplete="off">
+
       <div class="row">
         <div class="field">
           <label for="fecha">Fecha de la reunión</label>
           <input type="date" id="fecha">
         </div>
         <button id="extraer">Extraer tareas</button>
+        <button id="ver-ejemplo" class="secondary">Ver ejemplo</button>
       </div>
 
       <div id="error" class="error" hidden></div>
@@ -142,6 +147,7 @@
           </div>
         </div>
       </div>
+      <p id="demo-aviso" class="demo-notice" hidden>Ejemplo guardado: no se ha llamado a la IA</p>
       <div class="table-wrap">
         <table>
           <thead>
@@ -176,6 +182,7 @@
   <script>
     const $ = (id) => document.getElementById(id);
     const btn = $("extraer");
+    const btnEjemplo = $("ver-ejemplo");
     const btnCopiar = $("copiar");
     const btnCsv = $("descargar-csv");
     const btnSheets = $("copiar-sheets");
@@ -233,6 +240,7 @@
     btn.addEventListener("click", async () => {
       const transcripcion = $("transcripcion").value.trim();
       mostrarError("");
+      $("demo-aviso").hidden = true;
       if (!transcripcion) {
         mostrarError("Pega una transcripción antes de continuar.");
         return;
@@ -245,7 +253,7 @@
         const resp = await fetch("/api/extract", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ transcripcion, fecha: $("fecha").value, codigo: $("codigo").value }),
+          body: JSON.stringify({ transcripcion, fecha: $("fecha").value, codigo: $("codigo").value, participantes: $("participantes").value }),
         });
         const data = await resp.json().catch(() => ({}));
         if (!resp.ok) throw new Error(data.error || `Error ${resp.status}`);
@@ -257,6 +265,31 @@
       } finally {
         btn.disabled = false;
         btn.textContent = "Extraer tareas";
+      }
+    });
+
+    btnEjemplo.addEventListener("click", async () => {
+      mostrarError("");
+      btnEjemplo.disabled = true;
+      try {
+        const [transcripcionResp, resultadoResp] = await Promise.all([
+          fetch("/demo/transcripcion.txt"),
+          fetch("/demo/resultado.json"),
+        ]);
+        if (!transcripcionResp.ok || !resultadoResp.ok) throw new Error("No se ha podido cargar el ejemplo.");
+
+        $("transcripcion").value = await transcripcionResp.text();
+        $("fecha").value = "2026-10-27";
+        $("participantes").value = "Marina, Clara, Andrés, Tomás, Raquel, Julián, Nerea, Álvaro";
+        const data = await resultadoResp.json();
+        tareas = Array.isArray(data.tareas) ? data.tareas : [];
+        pendientes = Array.isArray(data.pendientes) ? data.pendientes : [];
+        pintar();
+        $("demo-aviso").hidden = false;
+      } catch (e) {
+        mostrarError(e.message || "No se ha podido cargar el ejemplo.");
+      } finally {
+        btnEjemplo.disabled = false;
       }
     });
 

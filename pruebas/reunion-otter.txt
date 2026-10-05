@@ -1,0 +1,287 @@
+Speaker 1  0:02
+¿Se me oye? Tomás, tienes el micro abierto y hay eco.
+
+Speaker 2  0:05
+Perdón, ya está.
+
+Speaker 3  0:08
+Vale, creo que ya estamos todos. Os pongo en contexto: hoy tenemos cinco bloques. El postmortem de la incidencia del miércoles pasado, la migración de Post gres, lo de Grupo Atlas con el SSO, los números raros del dashboard y la auditoría de seguridad. Si sobra tiempo, el rendimiento del frontend. Y os recuerdo que el sprint acaba el viernes 6 de noviembre, así que lo que acordemos hoy o cabe ahí o lo decimos explícitamente.
+
+Speaker 4  0:42
+Perdona, Raquel, yo tengo que irme a las doce menos cuarto, ¿puedo meter lo de Atlas antes?
+
+Speaker 3  0:48
+Intentamos. Empezamos por el postmortem, que es lo más urgente. Marina, cuéntanos.
+
+Speaker 5  0:55
+Vale. El miércoles 21, sobre las diez y media de la mañana, el proveedor de pagos empezó a responder con timeouts de treinta segundos. Nuestro worker de cobros tenía una política de reintento muy básica: si fallaba, volvía a encolar el mensaje a los cinco segundos, sin límite de reintentos y sin jitter. Es decir, todos los mensajes fallidos reintentaban a la vez, cada cinco segundos, y mientras tanto entraban cobros nuevos. En veinte minutos la cola pasó de unos doscientos mensajes a cuarenta y ocho mil.
+
+Speaker 6  1:33
+Y lo peor es que los consumidores de esa cola comparten el pool de conexiones a la base de datos con la API. Cuando los consumidores se comieron las conexiones, la API empezó a dar 500 en endpoints que no tenían nada que ver con pagos.
+
+Speaker 5  1:49
+Exacto. Estuvimos cuarenta y siete minutos degradados. Y el segundo problema, que es el que duele a negocio: en treinta y un casos se cobró dos veces. El proveedor sí procesó el primer intento aunque nos devolvió timeout, nosotros reintentamos y se generó un segundo cargo.
+
+Speaker 7  2:10
+De esos treinta y uno, finanzas ya ha devuelto veintinueve. Faltan dos clientes a los que no se les puede devolver porque tienen la tarjeta caducada. Yo los llamo hoy para pedirles otro método de pago o el IBAN para la transferencia.
+
+Speaker 3  2:26
+Perfecto, gracias. Andrés, ¿cómo lo arreglamos para que no vuelva a pasar?
+
+Speaker 6  2:32
+Hay dos cosas distintas. La primera es la idempotencia. La idea es que antes de llamar al proveedor generamos un identificador único por intento de pago, un UUID, lo guardamos en nuestra base de datos y lo mandamos en una cabecera Idempotency-Key. El proveedor guarda esa clave veinticuatro horas y, si le llega la misma otra vez, no vuelve a cobrar, devuelve el resultado del primer intento. Así un reintento es seguro aunque el primero se haya procesado de verdad.
+
+Speaker 6  3:09
+La segunda es la política de reintentos: backoff exponencial con jitter, un máximo de cinco intentos y una dead-letter queue para lo que se agote, de modo que no se quede reintentando eternamente y alguien lo revise a mano.
+
+Speaker 2  3:27
+¿Y un circuit breaker? Yo lo he usado en el cliente de la API del front y funciona bien.
+
+Speaker 6  3:33
+Sí, un circuit breaker aquí tendría sentido: si el proveedor falla mucho durante un minuto, dejamos de llamarle un rato en vez de seguir martilleando. Pero eso es más trabajo y meterlo con prisa es arriesgarse. Lo dejaría para el siguiente sprint, que acaba el 20 de noviembre.
+
+Speaker 3  3:53
+De acuerdo. Entonces en este sprint, idempotencia y backoff con jitter. ¿Llegas, Andrés?
+
+Speaker 6  4:00
+Llego. Lo tengo para el viernes 6, que es el cierre del sprint.
+
+Speaker 5  4:06
+Por mi parte, tres cosas. Una, alertas: voy a poner alertas cuando la profundidad de la cola pase de cinco mil mensajes y cuando el lag de los consumidores supere un minuto. Eso lo tengo para este viernes. Dos, limitar la concurrencia de los consumidores para que nunca puedan acaparar más de un tercio del pool de conexiones. Tres, el documento del postmortem, que lo publico mañana. Bueno, el jueves, que mañana estoy de guardia.
+
+Speaker 3  4:43
+¿Este viernes es el 30?
+
+Speaker 5  4:46
+El 30, sí. Las alertas el 30, el postmortem el jueves 29.
+
+Speaker 4  4:53
+Una pregunta de negocio: ¿damos algún crédito o descuento a los afectados?
+
+Speaker 3  4:59
+Lo hablamos el viernes con dirección y la decisión fue que no, que con la devolución completa y el correo de disculpas es suficiente. No lo reabrimos.
+
+Speaker 4  5:10
+Vale, solo preguntaba.
+
+Speaker 5  5:14
+Una cosa más que he descubierto al revisar los logs de la incidencia, y que le interesa a Álvaro. La clave de API del proveedor de pagos aparecía en texto plano en unas trazas que subimos a data dog.
+
+Speaker 8  5:29
+Eso es grave. Hay que rotar esa clave. Yo la roto, pero necesito que Marina purgue antes esos logs, o la clave nueva puede acabar igual.
+
+Speaker 5  5:39
+Purgo esos logs hoy, en cuanto termine esta reunión.
+
+Speaker 8  5:44
+Entonces yo rotaré la clave el viernes 30 como tarde.
+
+Speaker 3  5:50
+Perfecto. Pasamos a lo de Atlas, que Julián se va. Julián.
+
+Speaker 4  5:55
+Gracias. Grupo Atlas es la renovación más grande que tenemos este trimestre, ciento ochenta mil euros al año. Me han dicho que para firmar la renovación, que tiene que cerrarse antes del 15 de diciembre, necesitan SSO con sámel y logs de auditoría. Y yo, hablando con ellos la semana pasada, les dije que probablemente podríamos tenerlo en el cuarto trimestre.
+
+Speaker 3  6:24
+Julián, ¿y por qué les dices eso sin hablar antes con ingeniería?
+
+Speaker 4  6:29
+Fue una conversación informal, no di una fecha cerrada.
+
+Speaker 3  6:34
+Vale, pero ahora hay que gestionarlo. Andrés, ¿qué implica?
+
+Speaker 6  6:39
+Para empezar, SAML. Nuestro producto actúa como service provider y la empresa cliente tiene un identity provider, por ejemplo Okta o Azure AD. Hay que exponer un endpoint de metadata, un assertion consumer service que reciba y valide las aserciones firmadas, gestionar certificados con rotación y mapear los atributos del usuario a nuestros roles. Eso son unas tres semanas de backend, con pruebas contra al menos dos proveedores de identidad. Y los logs de auditoría, que ya los generamos internamente, hay que exponerlos con filtrado y exportación: otras dos semanas.
+
+Speaker 2  7:21
+Y yo necesito una pantalla de configuración de SSO en el panel de administración: subir los metadatos, probar la conexión, activar o desactivar. Una semana, pero necesito que alguien me pase un diseño.
+
+Speaker 3  7:36
+Un diseño... no tenemos diseñador esta semana. Habría que ver quién lo hace.
+
+Speaker 2  7:42
+Si no, lo monto con los componentes que ya tenemos, pero sin diseño nuevo.
+
+Speaker 3  7:47
+Eso lo decidimos luego. Álvaro, ¿qué tienes tú?
+
+Speaker 8  7:51
+Para los logs de auditoría, Atlas va a pedir nuestro informe SOC 2 Tipo II, y se lo puedo dar bajo NDA. Necesito el contacto de seguridad de ellos y que Julián confirme que hay NDA firmado.
+
+Speaker 4  8:05
+NDA hay, te lo reenvío hoy junto con el contacto.
+
+Speaker 3  8:10
+Vale. Mira, Julián, con las estimaciones de Andrés, las tres semanas de SAML más dos de logs más una de frontend suman seis, y ahora mismo en el sprint tenemos lo de pagos y la migración. Yo no me voy a comprometer a una fecha hoy. Andrés, quiero una estimación escrita con hitos, y la quiero el viernes 30.
+
+Speaker 6  8:37
+Hecho, el 30.
+
+Speaker 3  8:40
+Y Julián, mañana llamas a Atlas, matizas lo del cuarto trimestre y les dices que tendrás fecha la semana que viene.
+
+Speaker 4  8:48
+Mañana miércoles, de acuerdo. Aunque me da corte.
+
+Speaker 3  8:53
+Mejor corte ahora que un incumplimiento en diciembre.
+
+Speaker 4  8:58
+Una última cosa antes de irme, ¿podemos hablar de un plan nuevo de precios? Tengo una propuesta.
+
+Speaker 3  9:05
+Hoy no. Es un tema para otra reunión y habría que preparar un análisis con finanzas antes, pero no tengo claro quién lo haría.
+
+Speaker 4  9:15
+Vale, lo apuntáis. Me voy, un saludo.
+
+Speaker 3  9:21
+Siguiente, la migración de Post gres. Marina.
+
+Speaker 5  9:25
+Vale. Estamos en la versión 12, que está fuera de soporte desde noviembre de 2024, y queremos pasar a la 16. Tenemos dos caminos. El primero es pg_upgrade en el sitio: es sencillo, pero implica parar la aplicación unos cuarenta minutos mientras se migra. El segundo es replicación lógica a una instancia nueva con la versión 16 y hacer un cambio en caliente: mientras tanto producción sigue funcionando, y el corte, cuando redirigimos el tráfico, son cinco o diez minutos en modo solo lectura. Yo recomiendo el segundo.
+
+Speaker 1  10:09
+¿Y por qué no a la 17 directamente?
+
+Speaker 5  10:12
+Porque de besio y un par de extensiones todavía no la soportan bien. La 16 y punto.
+
+Speaker 1  10:19
+Vale. Pues con la replicación lógica hay un problema para mi pipeline. Necesita que cada tabla tenga clave primaria, o una identidad de réplica configurada. Hay tres tablas que no tienen: events_raw, audit_tmp y legacy_imports.
+
+Speaker 6  10:38
+audit_tmp se puede borrar, esa ya no la usa nadie. Legacy_imports no, esa la usa el import nocturno de un cliente.
+
+Speaker 1  10:48
+Vale. Entonces borro audit_tmp, y en events_raw y legacy_imports configuro REPLICA IDENTITY FULL, que es la solución rápida: Postgres replica la fila entera en vez de solo la clave. Pesa más, pero events_raw es una tabla de solo inserciones, así que no debería importar. Lo hago antes del 4 de noviembre.
+
+Speaker 5  11:13
+Perfecto. Y el siguiente punto de riesgo es Debezium, el conector que Clara usa para el CDC. La versión que tenemos instalada, creo que la 2.2, no sé si es compatible con la 16.
+
+Speaker 1  11:28
+Lo tengo que probar en staging. Si no es compatible, hay que subir de versión, y eso puede traerme dos o tres días de trabajo. Os confirmo antes del 6 si va o no va.
+
+Speaker 3  11:41
+Vale. Y fecha de corte, Marina.
+
+Speaker 5  11:44
+Sábado 14 de noviembre, a las dos de la madrugada, que es cuando hay menos tráfico. Si Clara dice que Debezium no va, lo pasamos al sábado 21.
+
+Speaker 7  11:56
+Perdón, en el contrato con los clientes enterprise tenemos que avisarles con diez días naturales de antelación de cualquier ventana de mantenimiento. Si es el 14, el aviso tiene que salir como muy tarde el 4 de noviembre.
+
+Speaker 3  12:11
+Eso lo preparas tú, Nerea.
+
+Speaker 7  12:14
+Sí, lo redacto y lo mando antes del 4. Pero me gustaría que Julián lo viera antes de enviarlo, por si hay alguna cuenta delicada, como Atlas.
+
+Speaker 3  12:24
+Julián se ha ido, se lo pasas por correo.
+
+Speaker 7  12:28
+Vale, se lo mando mañana por la mañana.
+
+Speaker 2  12:33
+En el front pondré un banner de mantenimiento programado, con una feature flag para encenderlo y apagarlo. Lo puedo tener para el 12 de noviembre.
+
+Speaker 5  12:43
+Yo antes de eso hago un ensayo completo en staging, el sábado 7, y tengo que dejar escrito el plan de rollback antes del ensayo, o sea, el viernes 6.
+
+Speaker 3  12:56
+¿Y quién está de guardia la noche del corte?
+
+Speaker 5  13:00
+Yo estoy, y Andrés como apoyo si pasa algo con la aplicación.
+
+Speaker 6  13:06
+Sí, cuenta conmigo, ese fin de semana no tengo planes.
+
+Speaker 3  13:12
+Bien. Siguiente, los números del dashboard. Clara.
+
+Speaker 1  13:16
+Esto es un fallo mío, o más bien del modelo. En de be té tenemos un modelo, fct_subscriptions, que une suscripciones con reembolsos. El join lo hice por customer_id en vez de por subscription_id. Cuando un cliente tiene un reembolso y después reactiva la suscripción, se duplican las filas. El resultado es que el MRR está inflado en torno a un cuatro por ciento y el churn está infraestimado.
+
+Speaker 7  13:50
+Y eso me afecta de lleno. El jueves 5 tengo el QBR con tres clientes y los números de churn van ahí.
+
+Speaker 1  13:58
+Lo arreglo y recalculo el histórico. El martes 3 lo tengo, y antes de dárselo a nadie se lo enseño a Paloma, de finanzas, para que lo valide contra su hoja.
+
+Speaker 7  14:12
+Si el martes no está, presento con los números viejos y una nota al pie.
+
+Speaker 1  14:17
+Estará. Y a todos: hasta que lo arregle, no uséis el MRR del dashboard en nada que salga fuera de la empresa.
+
+Speaker 3  14:26
+Anotado. Siguiente, seguridad. Álvaro.
+
+Speaker 8  14:30
+El lunes nos llegó el informe del pentest externo. Hay un hallazgo alto y dos medios. El alto: no hay límite de intentos en el login ni en el reset de contraseña, lo que permite credential stuffing, o sea, probar listas de credenciales filtradas de otros servicios hasta que alguna funcione. Los medios: en producción, algunos errores 500 devuelven el stack trace completo en la respuesta, y hay una dependencia de JavaScript con una vulnerabilidad conocida.
+
+Speaker 5  15:10
+El límite de intentos lo puedo poner ya en el API gateway, con una regla: diez intentos por minuto por IP. No es perfecto, pero tapa el hueco hasta que se haga bien. Lo tengo para el miércoles 4.
+
+Speaker 6  15:25
+Y el límite bueno, por cuenta de usuario y con contadores en Redis, lo hago yo en el siguiente sprint.
+
+Speaker 8  15:32
+Me parece bien. ¿Y los stack traces?
+
+Speaker 6  15:35
+Eso es una línea en el manejador de errores. Lo arreglo mañana.
+
+Speaker 2  15:40
+La dependencia vulnerable es del front, y ya la actualicé el lunes. Dependabot también lo activé el lunes.
+
+Speaker 8  15:49
+Perfecto, entonces eso está cerrado. Yo mando el informe de seguimiento del pentest dentro de dos semanas, para confirmar las correcciones.
+
+Speaker 3  15:59
+¿Algo más de seguridad?
+
+Speaker 8  16:02
+Una cosa que me preocupa y no tiene dueño: no tenemos un runbook de rotación de claves. Hoy lo hemos improvisado. Alguien debería escribirlo.
+
+Speaker 3  16:13
+Estoy de acuerdo. Lo dejamos apuntado.
+
+Speaker 2  16:17
+Si queda tiempo, puedo hablar de rendimiento del front.
+
+Speaker 3  16:21
+Dale, cinco minutos.
+
+Speaker 2  16:24
+El LCP en móvil está en cuatro coma uno segundos, y el objetivo es menos de dos y medio. El principal culpable es la librería de gráficos, que pesa unos trescientos ochenta kilobytes y se carga en todas las páginas aunque solo se use en el dashboard. La solución rápida es cargarla de forma diferida solo donde hace falta. Eso lo hago en un par de días. La solución grande es migrar de Webpack a Vite, que daría builds mucho más rápidos y mejor tree shaking, pero es un cambio gordo.
+
+Speaker 3  17:06
+Vite ahora no. Ni en este sprint ni en el siguiente, lo vemos en el primer trimestre. La carga diferida sí, hazla.
+
+Speaker 2  17:15
+Vale, entonces la hago esta semana.
+
+Speaker 6  17:19
+Y habría que medir si mejorar el LCP mueve la conversión, con un experimento A/B. Si no, esto es fe.
+
+Speaker 3  17:27
+Cierto. A ver quién lo monta. Apuntado también.
+
+Speaker 3  17:33
+Cierro con un resumen. Andrés, idempotencia y backoff el 6, estimación de Atlas el 30, stack traces mañana. Marina, alertas el 30, postmortem el 29, gateway el 4, ensayo el 7 y plan de rollback antes. Clara, el modelo el 3 y Debezium el 6. Tomás, carga diferida esta semana y banner el 12. Nerea, aviso antes del 4 y los dos clientes hoy. Álvaro, rotar la clave el 30. Y todos, necesito que comentéis el documento de arquitectura de la migración antes del lunes 2.
+
+Speaker 2  18:22
+¿Qué documento?
+
+Speaker 3  18:24
+El que os mandé por correo el viernes, el de la migración. Comentarios antes del lunes 2.
+
+Speaker 1  18:32
+Vale, lo miro.
+
+Speaker 3  18:35
+Muchas gracias a todos. Hasta la próxima.

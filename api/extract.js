@@ -39,7 +39,8 @@ const SCHEMA = {
   additionalProperties: false,
 };
 
-const SYSTEM = `Eres un asistente que extrae tareas de transcripciones de reuniones. Devuelve solo un JSON con dos listas: tareas y pendientes. Cada tarea tiene: tarea, responsable, fecha_limite, certeza (alta, media o baja) y cita (la frase literal de la transcripción de la que sale). Cada pendiente tiene: descripcion y cita (la frase literal de la transcripción de la que sale). Reglas: si nadie dijo quién se encarga, pon 'sin asignar' y no te inventes un nombre. Convierte fechas relativas ('el viernes', 'la semana que viene') en fechas concretas usando la fecha de la reunión que te paso. Si no hay plazo, pon 'sin fecha'. Si algo es ambiguo, certeza baja. No incluyas tareas que nadie se haya comprometido a hacer. Además, incluye en \`pendientes\` las cosas que alguien dijo que habría que hacer pero que nadie asumió: expresiones como 'alguien debería', 'habría que', 'tenemos que' sin un responsable claro o que se aplazan sin fecha. Si alguien se comprometió, aunque sea con poca convicción, va en \`tareas\` y no en \`pendientes\`. No inventes pendientes que no se hayan dicho. Responde sin texto adicional.`;
+const SYSTEM = `Eres un asistente que extrae tareas de transcripciones de reuniones. Devuelve solo un JSON con dos listas: tareas y pendientes. Cada tarea tiene: tarea, responsable, fecha_limite, certeza (alta, media o baja) y cita (la frase literal de la transcripción de la que sale). Cada pendiente tiene: descripcion y cita (la frase literal de la transcripción de la que sale). Reglas: si nadie dijo quién se encarga, pon 'sin asignar' y no te inventes un nombre. Convierte fechas relativas ('el viernes', 'la semana que viene') en fechas concretas usando la fecha de la reunión que te paso. Si no hay plazo, pon 'sin fecha'. Si algo es ambiguo, certeza baja. No incluyas tareas que nadie se haya comprometido a hacer. Además, incluye en \`pendientes\` las cosas que alguien dijo que habría que hacer pero que nadie asumió: expresiones como 'alguien debería', 'habría que', 'tenemos que' sin un responsable claro o que se aplazan sin fecha. Si alguien se comprometió, aunque sea con poca convicción, va en \`tareas\` y no en \`pendientes\`. No inventes pendientes que no se hayan dicho. La transcripción puede venir de distintas herramientas y estar imperfecta. Ignora cabeceras, marcas de tiempo, numeración de subtítulos y avisos de la herramienta. Si los hablantes aparecen como "Speaker 1", "Hablante 2" o no hay etiquetas, no asumas quién es cada uno: deduce el responsable solo de los nombres que se mencionan en la conversación, y si no se puede saber con seguridad, pon "sin asignar". Los nombres pueden estar mal transcritos; si dos variantes parecen la misma persona por contexto, úsalas como una sola y escribe la forma más repetida. No corrijas ni inventes frases en la cita literal: copia lo que aparece en el texto. Antes de responder, recorre la transcripción en orden y revisa cada compromiso explícito ('yo estoy', 'cuenta conmigo', 'yo mando', 'lo hago'). Si alguien se compromete, aunque sea con poca convicción, inclúyelo como tarea con certeza baja o media; no lo omitas. No fusiones en una sola tarea compromisos de personas distintas. Responde sin texto adicional.`;
+const SYSTEM_ADDITIONAL_RULES = "`fecha_limite` debe ser exactamente una fecha en formato AAAA-MM-DD o el texto 'sin fecha', sin ningún texto adicional. Si el plazo es 'antes del 4', pon la fecha del 4 y deja la aclaración para el campo tarea o ignórala. Si alguien pide a todo el grupo que haga algo ('todos', 'necesito que comentéis'), el responsable es 'todos', aunque solo una persona responda afirmativamente.";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -47,7 +48,11 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Método no permitido" });
   }
 
-  const { transcripcion, fecha, codigo } = req.body || {};
+  const { transcripcion, fecha, codigo, participantes } = req.body || {};
+  const listaParticipantes = typeof participantes === "string" ? participantes.trim() : "";
+  const instruccionParticipantes = listaParticipantes
+    ? `Lista de participantes: ${listaParticipantes}. Si en la transcripción aparece un nombre que se parece a uno de la lista (por ejemplo por un error de transcripción), usa siempre la forma de la lista. No asignes responsables que no estén en la lista salvo que sea imposible evitarlo.\n\n`
+    : "";
 
   if (!process.env.ACCESS_CODE || codigo !== process.env.ACCESS_CODE) {
     return res.status(401).json({ error: "Código de acceso incorrecto." });
@@ -68,7 +73,7 @@ export default async function handler(req, res) {
       max_tokens: 16000,
       betas: ["server-side-fallback-2026-07-01"],
       fallbacks: "default",
-      system: SYSTEM,
+      system: `${SYSTEM} ${SYSTEM_ADDITIONAL_RULES}`,
       output_config: {
         effort: "medium",
         format: { type: "json_schema", schema: SCHEMA },
@@ -78,6 +83,7 @@ export default async function handler(req, res) {
           role: "user",
           content:
             `Fecha de la reunión: ${fechaReunion ?? "desconocida (no resuelvas fechas relativas, cópialas tal cual)"}\n\n` +
+            instruccionParticipantes +
             `<transcripcion>\n${transcripcion}\n</transcripcion>`,
         },
       ],
