@@ -1,0 +1,216 @@
+{
+  "modelo": "claude-haiku-4-5-20251001",
+  "formato": "corrido",
+  "participantes": "con",
+  "pasada": 3,
+  "fecha_hora": "2026-10-07T14:58:40.496Z",
+  "fecha_reunion": "2026-10-27",
+  "duracion_ms": 29708,
+  "tokens_entrada": 5081,
+  "tokens_salida": 2781,
+  "commit": "eac7d35",
+  "respuesta": {
+    "tareas": [
+      {
+        "tarea": "Llamar a los dos clientes con tarjeta caducada para pedirles otro método de pago o el IBAN para la transferencia",
+        "responsable": "Marina",
+        "fecha_limite": "2026-10-27",
+        "certeza": "alta",
+        "cita": "de esos treinta y uno finanzas ya ha devuelto veintinueve faltan dos clientes a los que no se les puede devolver porque tienen la tarjeta caducada yo los llamo hoy para pedirles otro método de pago o el iban para la transferencia"
+      },
+      {
+        "tarea": "Implementar idempotencia con UUID y cabecera idempotency key en llamadas al proveedor de pagos",
+        "responsable": "Andrés",
+        "fecha_limite": "2026-11-06",
+        "certeza": "alta",
+        "cita": "antes de llamar al proveedor generamos un identificador único por intento de pago un uuid lo guardamos en nuestra base de datos y lo mandamos en una cabecera idempotency key"
+      },
+      {
+        "tarea": "Implementar política de reintentos con backoff exponencial, jitter, máximo 5 intentos y dead letter queue",
+        "responsable": "Andrés",
+        "fecha_limite": "2026-11-06",
+        "certeza": "alta",
+        "cita": "la política de reintentos backoff exponencial con jitter un máximo de cinco intentos y una dead letter queue"
+      },
+      {
+        "tarea": "Configurar alertas para profundidad de cola mayor a 5000 mensajes y lag de consumidores mayor a un minuto",
+        "responsable": "Andrés",
+        "fecha_limite": "2026-10-30",
+        "certeza": "alta",
+        "cita": "voy a poner alertas cuando la profundidad de la cola pase de cinco mil mensajes y cuando el lag de los consumidores supere un minuto eso lo tengo para este viernes"
+      },
+      {
+        "tarea": "Limitar la concurrencia de los consumidores para que nunca acaparen más de un tercio del pool de conexiones",
+        "responsable": "Andrés",
+        "fecha_limite": "2026-11-06",
+        "certeza": "alta",
+        "cita": "limitar la concurrencia de los consumidores para que nunca puedan acaparar más de un tercio del pool de conexiones"
+      },
+      {
+        "tarea": "Publicar documento del postmortem de la incidencia",
+        "responsable": "Andrés",
+        "fecha_limite": "2026-10-29",
+        "certeza": "alta",
+        "cita": "el documento del postmortem que lo publico mañana bueno el jueves que mañana estoy de guardia"
+      },
+      {
+        "tarea": "Purgar logs de Data Dog con la clave de API del proveedor de pagos en texto plano",
+        "responsable": "Marina",
+        "fecha_limite": "2026-10-27",
+        "certeza": "alta",
+        "cita": "hay que rotar esa clave yo la roto pero necesito que marino purgue antes esos logs o la clave nueva puede acabar igual purgo esos logs hoy en cuanto termine esta reunión"
+      },
+      {
+        "tarea": "Rotar la clave de API del proveedor de pagos después de que se purguen los logs",
+        "responsable": "Álvaro",
+        "fecha_limite": "2026-10-30",
+        "certeza": "alta",
+        "cita": "yo rotaré la clave el viernes 30 como tarde"
+      },
+      {
+        "tarea": "Obtener contacto de seguridad de Atlas y reenviar NDA",
+        "responsable": "Julián",
+        "fecha_limite": "2026-10-27",
+        "certeza": "alta",
+        "cita": "necesito el contacto de seguridad de ellos y que julian confirme que hay nda firmado nda hay te lo reenvío hoy junto con el contacto"
+      },
+      {
+        "tarea": "Proporcionar estimación escrita con hitos para implementación de SAML, logs de auditoría y frontend de Atlas",
+        "responsable": "Andrés",
+        "fecha_limite": "2026-10-30",
+        "certeza": "alta",
+        "cita": "andres quiero una estimación escrita con hitos y la quiero el viernes 30 hecho el 30"
+      },
+      {
+        "tarea": "Llamar a Atlas para matizar lo del cuarto trimestre y confirmar que tendrá fecha la semana que viene",
+        "responsable": "Julián",
+        "fecha_limite": "2026-10-28",
+        "certeza": "alta",
+        "cita": "julian mañana llamas a atlas matizas lo del cuarto trimestre y les dices que tendrás fecha la semana que viene mañana miércoles"
+      },
+      {
+        "tarea": "Borrar tabla audit_tmp y configurar replica identity full en events_raw y legacy_imports",
+        "responsable": "Marina",
+        "fecha_limite": "2026-11-04",
+        "certeza": "alta",
+        "cita": "borro audit tmp y en events raw y legacy imports configuro replica identity full lo hago antes del 4 de noviembre"
+      },
+      {
+        "tarea": "Probar compatibilidad de Debezium versión 2.2 con PostgreSQL 16 en staging",
+        "responsable": "Marina",
+        "fecha_limite": "2026-11-06",
+        "certeza": "alta",
+        "cita": "la versión que tenemos instalada creo que la 2 2 no sé si es compatible con la 16 lo tengo que probar en staging si no es compatible hay que subir de versión os confirmo antes del 6"
+      },
+      {
+        "tarea": "Redactar y enviar aviso de ventana de mantenimiento a clientes enterprise",
+        "responsable": "Nerea",
+        "fecha_limite": "2026-11-04",
+        "certeza": "alta",
+        "cita": "eso lo preparas tú nerea sí lo redacto y lo mando antes del 4"
+      },
+      {
+        "tarea": "Revisar aviso de mantenimiento de migración PostgreSQL antes del envío",
+        "responsable": "Julián",
+        "fecha_limite": "2026-10-28",
+        "certeza": "alta",
+        "cita": "se lo mando mañana por la mañana"
+      },
+      {
+        "tarea": "Implementar banner de mantenimiento programado con feature flag en el frontend",
+        "responsable": "Tomás",
+        "fecha_limite": "2026-11-12",
+        "certeza": "alta",
+        "cita": "en el front pondré un banner de mantenimiento programado con una feature flag para encenderlo y apagarlo lo puedo tener para el 12 de noviembre"
+      },
+      {
+        "tarea": "Realizar ensayo completo de migración PostgreSQL en staging",
+        "responsable": "Marina",
+        "fecha_limite": "2026-11-07",
+        "certeza": "alta",
+        "cita": "antes de eso hago un ensayo completo en staging el sábado 7"
+      },
+      {
+        "tarea": "Escribir plan de rollback de migración PostgreSQL",
+        "responsable": "Marina",
+        "fecha_limite": "2026-11-06",
+        "certeza": "alta",
+        "cita": "tengo que dejar escrito el plan de rollback antes del ensayo o sea el viernes 6"
+      },
+      {
+        "tarea": "Arreglar modelo fct_subscriptions y recalcular histórico de métricas",
+        "responsable": "Clara",
+        "fecha_limite": "2026-11-03",
+        "certeza": "alta",
+        "cita": "lo arreglo y recalculo el histórico el martes 3 lo tengo"
+      },
+      {
+        "tarea": "Validar métricas corregidas con Paloma de finanzas",
+        "responsable": "Clara",
+        "fecha_limite": "2026-11-03",
+        "certeza": "alta",
+        "cita": "antes de dárselo a nadie se lo enseño a paloma de finanzas para que lo valide contra su hoja"
+      },
+      {
+        "tarea": "Implementar límite de intentos en login y reset de contraseña en API gateway",
+        "responsable": "Álvaro",
+        "fecha_limite": "2026-11-04",
+        "certeza": "alta",
+        "cita": "lo puedo poner ya en el api gateway con una regla diez intentos por minuto por ip no es perfecto pero tapa el hueco hasta que se haga bien lo tengo para el miércoles 4"
+      },
+      {
+        "tarea": "Arreglar manejador de errores para no devolver stack traces en producción",
+        "responsable": "Álvaro",
+        "fecha_limite": "2026-10-28",
+        "certeza": "alta",
+        "cita": "eso es una línea en el manejador de errores lo arreglo mañana"
+      },
+      {
+        "tarea": "Implementar carga diferida de librería de gráficos",
+        "responsable": "Tomás",
+        "fecha_limite": "2026-10-31",
+        "certeza": "alta",
+        "cita": "la solución rápida es cargarla de forma diferida solo donde hace falta eso lo hago en un par de días"
+      },
+      {
+        "tarea": "Comentar documento de arquitectura de la migración PostgreSQL",
+        "responsable": "todos",
+        "fecha_limite": "2026-11-02",
+        "certeza": "media",
+        "cita": "todos necesito que comentéis el documento de arquitectura de la migración antes del lunes 2"
+      },
+      {
+        "tarea": "Medir impacto de mejora de LCP en tasa de conversión con experimento A/B",
+        "responsable": "sin asignar",
+        "fecha_limite": "sin fecha",
+        "certeza": "baja",
+        "cita": "habría que medir si mejorar el lcp mueve la conversión con un experimento a b"
+      },
+      {
+        "tarea": "Preparar análisis de nuevo plan de precios con finanzas",
+        "responsable": "sin asignar",
+        "fecha_limite": "sin fecha",
+        "certeza": "baja",
+        "cita": "habría que preparar un análisis con finanzas antes pero no tengo claro quién lo haría"
+      }
+    ],
+    "pendientes": [
+      {
+        "descripcion": "Circuit breaker para el cliente de la API del proveedor de pagos se aplaza al siguiente sprint",
+        "cita": "un circuit breaker aquí tendría sentido si el proveedor falla mucho durante un minuto dejamos de llamarle un rato en vez de seguir martilleando pero eso es más trabajo y meterlo con prisa es arriesgarse lo dejaría para el siguiente sprint"
+      },
+      {
+        "descripcion": "Escribir runbook de rotación de claves de seguridad",
+        "cita": "no tenemos un runbook de rotación de claves hoy lo hemos improvisado alguien debería escribirlo"
+      },
+      {
+        "descripcion": "Migrar de webpack a vite para mejorar builds y tree shaking, se revisa en el primer trimestre",
+        "cita": "la solución grande es migrar de webpack a vite que daría builds mucho más rápidos y mejor tree shaking pero es un cambio gordo vite ahora no ni en este sprint ni en el siguiente lo vemos en el primer trimestre"
+      },
+      {
+        "descripcion": "Propuesta de nuevo plan de precios, requiere tema separado y análisis con finanzas",
+        "cita": "podemos hablar de un plan nuevo de precios tengo una propuesta hoy no es un tema para otra reunión y habría que preparar un análisis con finanzas antes"
+      }
+    ]
+  }
+}

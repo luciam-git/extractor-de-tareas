@@ -1,0 +1,238 @@
+{
+  "modelo": "claude-opus-5-5",
+  "formato": "corrido",
+  "participantes": "sin",
+  "pasada": 3,
+  "fecha_hora": "2026-10-07T15:01:50.278Z",
+  "fecha_reunion": "2026-10-27",
+  "duracion_ms": 49550,
+  "tokens_entrada": 6741,
+  "tokens_salida": 6347,
+  "commit": "eac7d35",
+  "respuesta": {
+    "tareas": [
+      {
+        "tarea": "Llamar a los dos clientes con tarjeta caducada para pedirles otro método de pago o el IBAN para la transferencia de la devolución",
+        "responsable": "Nerea",
+        "fecha_limite": "2026-10-27",
+        "certeza": "alta",
+        "cita": "yo los llamo hoy para pedirles otro método de pago o el iban para la transferencia"
+      },
+      {
+        "tarea": "Implementar idempotencia (idempotency key) y política de reintentos con backoff exponencial, jitter, máximo de cinco intentos y dead letter queue en el worker de cobros",
+        "responsable": "Andres",
+        "fecha_limite": "2026-11-06",
+        "certeza": "alta",
+        "cita": "llego lo tengo para el viernes 6 que es el cierre del sprint"
+      },
+      {
+        "tarea": "Poner alertas por profundidad de la cola (más de cinco mil mensajes) y por lag de los consumidores (más de un minuto)",
+        "responsable": "Marino",
+        "fecha_limite": "2026-10-30",
+        "certeza": "alta",
+        "cita": "voy a poner alertas cuando la profundidad de la cola pase de cinco mil mensajes y cuando el lag de los consumidores supere un minuto eso lo tengo para este viernes"
+      },
+      {
+        "tarea": "Limitar la concurrencia de los consumidores para que no acaparen más de un tercio del pool de conexiones",
+        "responsable": "Marino",
+        "fecha_limite": "sin fecha",
+        "certeza": "media",
+        "cita": "dos limitar la concurrencia de los consumidores para que nunca puedan acaparar más de un tercio del pool de conexiones"
+      },
+      {
+        "tarea": "Publicar el documento del postmortem",
+        "responsable": "Marino",
+        "fecha_limite": "2026-10-29",
+        "certeza": "alta",
+        "cita": "las alertas el 30 el postmortem el jueves 29"
+      },
+      {
+        "tarea": "Purgar los logs de Datadog donde aparece la clave de API del proveedor de pagos en texto plano",
+        "responsable": "Marino",
+        "fecha_limite": "2026-10-27",
+        "certeza": "alta",
+        "cita": "purgo esos logs hoy en cuanto termine esta reunión"
+      },
+      {
+        "tarea": "Rotar la clave de API del proveedor de pagos",
+        "responsable": "Álvaro",
+        "fecha_limite": "2026-10-30",
+        "certeza": "alta",
+        "cita": "entonces yo rotaré la clave el viernes 30 como tarde"
+      },
+      {
+        "tarea": "Reenviar a Álvaro el NDA firmado con Atlas y el contacto de seguridad de Atlas",
+        "responsable": "Julian",
+        "fecha_limite": "2026-10-27",
+        "certeza": "alta",
+        "cita": "nda hay te lo reenvío hoy junto con el contacto"
+      },
+      {
+        "tarea": "Entregar a Atlas el informe SOC 2 tipo II bajo NDA",
+        "responsable": "Álvaro",
+        "fecha_limite": "sin fecha",
+        "certeza": "baja",
+        "cita": "atlas va a pedir nuestro informe soc 2 tipo ii y se lo puedo dar bajo nda"
+      },
+      {
+        "tarea": "Entregar estimación escrita con hitos del proyecto SSO SAML y logs de auditoría para Atlas",
+        "responsable": "Andres",
+        "fecha_limite": "2026-10-30",
+        "certeza": "alta",
+        "cita": "hecho el 30"
+      },
+      {
+        "tarea": "Llamar a Atlas para matizar lo del cuarto trimestre y decir que habrá fecha la semana que viene",
+        "responsable": "Julian",
+        "fecha_limite": "2026-10-28",
+        "certeza": "alta",
+        "cita": "mañana miércoles de acuerdo aunque me da corte"
+      },
+      {
+        "tarea": "Borrar la tabla audit tmp y configurar replica identity full en events raw y legacy imports (antes del 4 de noviembre)",
+        "responsable": "sin asignar",
+        "fecha_limite": "2026-11-04",
+        "certeza": "baja",
+        "cita": "vale entonces borro audit tmp y en events raw y legacy imports configuro replica identity full"
+      },
+      {
+        "tarea": "Probar en staging la compatibilidad de Debezium con Postgres 16 y confirmar si funciona",
+        "responsable": "Clarra",
+        "fecha_limite": "2026-11-06",
+        "certeza": "alta",
+        "cita": "os confirmo antes del 6 si va o no va"
+      },
+      {
+        "tarea": "Redactar y enviar a los clientes enterprise el aviso de la ventana de mantenimiento (antes del 4)",
+        "responsable": "Nerea",
+        "fecha_limite": "2026-11-04",
+        "certeza": "alta",
+        "cita": "sí lo redacto y lo mando antes del 4"
+      },
+      {
+        "tarea": "Enviar a Julian por correo el borrador del aviso de mantenimiento para revisión",
+        "responsable": "Nerea",
+        "fecha_limite": "2026-10-28",
+        "certeza": "alta",
+        "cita": "vale se lo mando mañana por la mañana"
+      },
+      {
+        "tarea": "Poner en el front un banner de mantenimiento programado con feature flag",
+        "responsable": "Tomas",
+        "fecha_limite": "2026-11-12",
+        "certeza": "alta",
+        "cita": "en el front pondré un banner de mantenimiento programado con una feature flag para encenderlo y apagarlo lo puedo tener para el 12 de noviembre"
+      },
+      {
+        "tarea": "Escribir el plan de rollback de la migración antes del ensayo",
+        "responsable": "Marino",
+        "fecha_limite": "2026-11-06",
+        "certeza": "alta",
+        "cita": "tengo que dejar escrito el plan de rollback antes del ensayo o sea el viernes 6"
+      },
+      {
+        "tarea": "Hacer un ensayo completo de la migración en staging",
+        "responsable": "Marino",
+        "fecha_limite": "2026-11-07",
+        "certeza": "alta",
+        "cita": "yo antes de eso hago un ensayo completo en staging el sábado 7"
+      },
+      {
+        "tarea": "Estar de guardia la noche del corte de la migración",
+        "responsable": "Marino",
+        "fecha_limite": "2026-11-14",
+        "certeza": "media",
+        "cita": "yo estoy y andres como apoyo si pasa algo con la aplicación"
+      },
+      {
+        "tarea": "Estar de apoyo en la guardia la noche del corte de la migración",
+        "responsable": "Andres",
+        "fecha_limite": "2026-11-14",
+        "certeza": "media",
+        "cita": "sí cuenta conmigo ese fin de semana no tengo planes"
+      },
+      {
+        "tarea": "Arreglar el modelo fct subscriptions (join por subscription id) y recalcular el histórico",
+        "responsable": "Clarra",
+        "fecha_limite": "2026-11-03",
+        "certeza": "alta",
+        "cita": "lo arreglo y recalculo el histórico el martes 3 lo tengo"
+      },
+      {
+        "tarea": "Enseñar los números corregidos a Paloma de finanzas para que los valide antes de compartirlos",
+        "responsable": "Clarra",
+        "fecha_limite": "2026-11-03",
+        "certeza": "media",
+        "cita": "antes de dárselo a nadie se lo enseño a paloma de finanzas para que lo valide contra su hoja"
+      },
+      {
+        "tarea": "Poner límite de intentos en el API gateway (diez intentos por minuto por IP)",
+        "responsable": "Marino",
+        "fecha_limite": "2026-11-04",
+        "certeza": "alta",
+        "cita": "el límite de intentos lo puedo poner ya en el api gateway con una regla diez intentos por minuto por ip no es perfecto pero tapa el hueco hasta que se haga bien lo tengo para el miércoles 4"
+      },
+      {
+        "tarea": "Implementar límite de intentos por cuenta de usuario con contadores en Redis en el siguiente sprint",
+        "responsable": "sin asignar",
+        "fecha_limite": "2026-11-20",
+        "certeza": "baja",
+        "cita": "y el límite bueno por cuenta de usuario y con contadores en redis lo hago yo en el siguiente sprint"
+      },
+      {
+        "tarea": "Quitar los stack traces de las respuestas de error 500 en el manejador de errores",
+        "responsable": "Andres",
+        "fecha_limite": "2026-10-28",
+        "certeza": "alta",
+        "cita": "eso es una línea en el manejador de errores lo arreglo mañana"
+      },
+      {
+        "tarea": "Enviar el informe de seguimiento del pentest para confirmar las correcciones",
+        "responsable": "Álvaro",
+        "fecha_limite": "2026-11-10",
+        "certeza": "media",
+        "cita": "yo mando el informe de seguimiento del pentest dentro de dos semanas para confirmar las correcciones"
+      },
+      {
+        "tarea": "Cargar de forma diferida la librería de gráficos solo donde hace falta",
+        "responsable": "Tomas",
+        "fecha_limite": "2026-10-30",
+        "certeza": "media",
+        "cita": "vale entonces la hago esta semana"
+      },
+      {
+        "tarea": "Comentar el documento de arquitectura de la migración",
+        "responsable": "todos",
+        "fecha_limite": "2026-11-02",
+        "certeza": "alta",
+        "cita": "todos necesito que comentéis el documento de arquitectura de la migración antes del lunes 2"
+      }
+    ],
+    "pendientes": [
+      {
+        "descripcion": "Implementar un circuit breaker para las llamadas al proveedor de pagos, aplazado al siguiente sprint sin responsable",
+        "cita": "lo dejaría para el siguiente sprint que acaba el 20 de noviembre"
+      },
+      {
+        "descripcion": "Decidir quién hace el diseño de la pantalla de configuración de SSO",
+        "cita": "habría que ver quién lo hace si no lo monto con los componentes que ya tenemos pero sin diseño nuevo eso lo decidimos luego"
+      },
+      {
+        "descripcion": "Preparar un análisis con finanzas sobre el nuevo plan de precios y tratarlo en otra reunión",
+        "cita": "hoy no es un tema para otra reunión y habría que preparar un análisis con finanzas antes pero no tengo claro quién lo haría"
+      },
+      {
+        "descripcion": "Escribir un runbook de rotación de claves",
+        "cita": "no tenemos un runbook de rotación de claves hoy lo hemos improvisado alguien debería escribirlo"
+      },
+      {
+        "descripcion": "Montar un experimento A/B para medir si mejorar el LCP mueve la conversión",
+        "cita": "habría que medir si mejorar el lcp mueve la conversión con un experimento a b"
+      },
+      {
+        "descripcion": "Migración de webpack a Vite, aplazada al primer trimestre sin responsable",
+        "cita": "vite ahora no ni en este sprint ni en el siguiente lo vemos en el primer trimestre"
+      }
+    ]
+  }
+}

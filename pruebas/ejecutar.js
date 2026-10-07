@@ -163,6 +163,42 @@ function getHttpStatus(error) {
   return Number.isInteger(status) ? status : null;
 }
 
+function sanitizeApiMessage(message, transcript) {
+  let sanitized = String(message ?? "");
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (apiKey) sanitized = sanitized.replaceAll(apiKey, "[clave omitida]");
+
+  const sensitiveText = new Set([
+    transcript,
+    ...transcript.split(/\r?\n/).map((line) => line.trim()).filter((line) => line.length >= 16),
+  ]);
+  for (const text of sensitiveText) {
+    if (!text) continue;
+    const escapedText = text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    sanitized = sanitized.replace(new RegExp(escapedText, "giu"), "[transcripcion omitida]");
+  }
+  return sanitized;
+}
+
+function getApiErrorDetails(error, transcript) {
+  const apiError = error?.error;
+  const type = typeof apiError?.type === "string" ? apiError.type : "api_error";
+  const message = typeof apiError?.message === "string" ? apiError.message : error?.message;
+  return { type, message: sanitizeApiMessage(message, transcript) };
+}
+
+function getStopReason(error) {
+  const apiError = error?.error;
+  const details = `${apiError?.type ?? ""} ${apiError?.message ?? error?.message ?? ""}`;
+  if (/insufficient(?:\s+\w+){0,2}\s+(?:credits?|funds?|balance)|not enough (?:credits?|funds?)|out of (?:credits?|funds?)|(?:credits?|funds?)\s+(?:are\s+)?(?:insufficient|exhausted|too low)|balance.{0,40}(?:low|insufficient|exhausted)|(?:saldo|fondos)\s+insuficientes/i.test(details)) {
+    return "saldo";
+  }
+  if (/authentication|unauthori[sz]ed|invalid api key|api key.{0,30}(?:invalid|missing)|not authenticated|forbidden|permission denied|access denied/i.test(details)) {
+    return "autenticacion";
+  }
+  return null;
+}
+
 function safeErrorDescription(error) {
   const status = getHttpStatus(error);
   return status === null ? "Error de API sin codigo HTTP." : `Error de API HTTP ${status}.`;
@@ -178,7 +214,6 @@ async function requestWithRetries(client, run, userMessage) {
         fallbacks: "default",
         system: SYSTEM,
         output_config: {
-          effort: "medium",
           format: { type: "json_schema", schema: outputSchema },
         },
         messages: [{ role: "user", content: userMessage }],
@@ -224,9 +259,11 @@ async function executeRun(client, run, commitHash) {
   let inputTokens = null;
   let outputTokens = null;
   let fatalError = null;
+  let transcript = "";
+  let executionFailed = false;
 
   try {
-    const transcript = await readFile(transcriptPaths[run.format], "utf8");
+    transcript = await readFile(transcriptPaths[run.format], "utf8");
     const userMessage = construirMensaje(
       transcript,
       meetingDate,
@@ -264,10 +301,11 @@ async function executeRun(client, run, commitHash) {
       };
     }
   } catch (error) {
+    executionFailed = true;
     const status = getHttpStatus(error);
-    const fatal = [400, 401, 402, 403].includes(status);
+    const stopReason = getStopReason(error);
     const description = safeErrorDescription(error);
-    fatalError = fatal ? status : null;
+    fatalError = stopReason ? { status, reason: stopReason } : null;
     result = {
       modelo: run.model,
       formato: run.format,
@@ -282,11 +320,15 @@ async function executeRun(client, run, commitHash) {
       respuesta: null,
       error: description,
     };
-    if (!fatal) await appendSafeError(run, error);
+    if (error instanceof Anthropic.APIError) {
+      const details = getApiErrorDetails(error, transcript);
+      console.error(`Anthropic ${details.type}: ${details.message}`);
+    }
+    if (!stopReason) await appendSafeError(run, error);
   }
 
   result.duracion_ms = Date.now() - startedAt;
-  await writeResult(resultPath, result);
+  if (!executionFailed) await writeResult(resultPath, result);
 
   const seconds = (result.duracion_ms / 1000).toFixed(1);
   const inputText = inputTokens ?? "-";
@@ -344,7 +386,8 @@ async function main() {
 
     const fatalStatus = await executeRun(client, run, commitHash);
     if (fatalStatus !== null) {
-      console.error(`Error de saldo o autenticacion (HTTP ${fatalStatus}). Se detuvieron las pruebas.`);
+      const reason = fatalStatus.reason === "saldo" ? "Saldo insuficiente" : "Error de autenticacion";
+      console.error(`${reason} (HTTP ${fatalStatus.status}). Se detuvieron las pruebas.`);
       process.exitCode = 1;
       return;
     }
