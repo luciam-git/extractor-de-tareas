@@ -1,0 +1,378 @@
+{
+  "reunion": {
+    "fecha": "2026-10-27",
+    "participantes": [
+      "Raquel",
+      "Andrés",
+      "Marina",
+      "Tomás",
+      "Clara",
+      "Julián",
+      "Nerea",
+      "Álvaro"
+    ]
+  },
+  "tareas": [
+    {
+      "id": 1,
+      "descripcion": "Llamar a los dos clientes con tarjeta caducada (otro método de pago o IBAN)",
+      "claves": ["clientes", "tarjeta caducada", "iban"],
+      "responsable": "Nerea",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-10-27"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 2,
+      "descripcion": "Idempotencia (Idempotency-Key) y backoff con jitter en el worker de cobros",
+      "claves": ["idempotencia", "backoff", "jitter"],
+      "responsable": "Andrés",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-11-06"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 3,
+      "descripcion": "Alertas de cola (más de 5000) y de lag (más de un minuto)",
+      "claves": ["alertas", "cola", "lag"],
+      "responsable": "Marina",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-10-30"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 4,
+      "descripcion": "Limitar la concurrencia de los consumidores a un tercio del pool",
+      "claves": ["concurrencia", "consumidores", "pool"],
+      "responsable": "Marina",
+      "dificil_sin_etiquetas": true,
+      "fechas_aceptadas": ["sin fecha"],
+      "certezas_aceptadas": ["media", "alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 5,
+      "descripcion": "Publicar el documento del postmortem",
+      "claves": ["publicar", "documento", "postmortem"],
+      "responsable": "Marina",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-10-29"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 6,
+      "descripcion": "Purgar los logs con la clave de API en texto plano",
+      "claves": ["purgar", "logs", "texto plano"],
+      "responsable": "Marina",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-10-27"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 7,
+      "descripcion": "Rotar la clave de API del proveedor de pagos",
+      "claves": ["rotar", "clave api", "pagos"],
+      "responsable": "Álvaro",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-10-30"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 8,
+      "descripcion": "Reenviar a Álvaro el NDA y el contacto de seguridad de Atlas",
+      "claves": ["nda", "seguridad", "atlas"],
+      "responsable": "Julián",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-10-27"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 9,
+      "descripcion": "Entregar a Atlas el informe SOC 2 Tipo II bajo NDA",
+      "claves": ["informe", "soc 2", "nda"],
+      "responsable": "Álvaro",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["sin fecha"],
+      "certezas_aceptadas": ["baja", "media"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 10,
+      "descripcion": "Estimación escrita con hitos (SAML, logs de auditoría, frontend)",
+      "claves": ["estimacion", "hitos", "saml"],
+      "responsable": "Andrés",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-10-30"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 11,
+      "descripcion": "Llamar a Atlas: matizar lo del cuarto trimestre, fecha la semana que viene",
+      "claves": ["llamar", "atlas", "trimestre"],
+      "responsable": "Julián",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-10-28"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 12,
+      "descripcion": "Borrar audit_tmp y configurar REPLICA IDENTITY FULL en events_raw y legacy_imports",
+      "claves": ["audit_tmp", "replica identity full", "events_raw"],
+      "responsable": "Clara",
+      "dificil_sin_etiquetas": true,
+      "fechas_aceptadas": ["2026-11-04"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 13,
+      "descripcion": "Probar Debezium con Postgres 16 en staging y confirmar",
+      "claves": ["debezium", "postgres 16", "staging"],
+      "responsable": "Clara",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-11-06"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 14,
+      "descripcion": "Redactar y enviar el aviso de mantenimiento a clientes enterprise",
+      "claves": ["aviso", "mantenimiento", "enterprise"],
+      "responsable": "Nerea",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-11-04"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 15,
+      "descripcion": "Enviar a Julián el borrador del aviso por correo",
+      "claves": ["borrador", "aviso", "correo"],
+      "responsable": "Nerea",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-10-28"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 16,
+      "descripcion": "Banner de mantenimiento programado con feature flag",
+      "claves": ["banner", "mantenimiento", "feature flag"],
+      "responsable": "Tomás",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-11-12"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 17,
+      "descripcion": "Escribir el plan de rollback",
+      "claves": ["plan", "rollback"],
+      "responsable": "Marina",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-11-06"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 18,
+      "descripcion": "Ensayo completo de la migración en staging",
+      "claves": ["ensayo", "migracion", "staging"],
+      "responsable": "Marina",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-11-07"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 19,
+      "descripcion": "Hacer el corte de la migración y estar de guardia esa noche",
+      "claves": ["guardia", "corte", "migracion"],
+      "responsable": "Marina",
+      "dificil_sin_etiquetas": true,
+      "fechas_aceptadas": ["2026-11-14"],
+      "certezas_aceptadas": ["media", "alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 20,
+      "descripcion": "Apoyo en la guardia de la noche del corte",
+      "claves": ["apoyo", "guardia", "corte"],
+      "responsable": "Andrés",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-11-14"],
+      "certezas_aceptadas": ["media", "alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 21,
+      "descripcion": "Corregir el join de fct_subscriptions y recalcular el histórico",
+      "claves": ["fct_subscriptions", "join", "historico"],
+      "responsable": "Clara",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-11-03"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 22,
+      "descripcion": "Enseñar los números corregidos a Paloma (finanzas) para validarlos",
+      "claves": ["numeros corregidos", "paloma", "finanzas"],
+      "responsable": "Clara",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-11-03"],
+      "certezas_aceptadas": ["alta", "media"],
+      "fusion_admitida_con": 21
+    },
+    {
+      "id": 23,
+      "descripcion": "Límite de intentos en el API gateway (10 por minuto por IP)",
+      "claves": ["intentos", "api gateway", "ip"],
+      "responsable": "Marina",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-11-04"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 24,
+      "descripcion": "Límite de intentos por cuenta con contadores en Redis",
+      "claves": ["intentos", "cuenta", "redis"],
+      "responsable": "Andrés",
+      "dificil_sin_etiquetas": true,
+      "fechas_aceptadas": ["2026-11-20", "sin fecha"],
+      "certezas_aceptadas": ["media"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 25,
+      "descripcion": "Quitar el stack trace de los errores 500",
+      "claves": ["stack trace", "errores", "500"],
+      "responsable": "Andrés",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-10-28"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 26,
+      "descripcion": "Informe de seguimiento del pentest",
+      "claves": ["seguimiento", "pentest", "informe"],
+      "responsable": "Álvaro",
+      "dificil_sin_etiquetas": true,
+      "fechas_aceptadas": ["2026-11-10"],
+      "certezas_aceptadas": ["alta", "media"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 27,
+      "descripcion": "Carga diferida de la librería de gráficos",
+      "claves": ["carga diferida", "libreria", "graficos"],
+      "responsable": "Tomás",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-10-30"],
+      "certezas_aceptadas": ["media", "alta"],
+      "fusion_admitida_con": null
+    },
+    {
+      "id": 28,
+      "descripcion": "Comentar el documento de arquitectura de la migración",
+      "claves": ["comentar", "arquitectura", "migracion"],
+      "responsable": "todos",
+      "dificil_sin_etiquetas": false,
+      "fechas_aceptadas": ["2026-11-02"],
+      "certezas_aceptadas": ["alta"],
+      "fusion_admitida_con": null
+    }
+  ],
+  "pendientes": [
+    {
+      "id": "P1",
+      "descripcion": "Circuit breaker para las llamadas al proveedor de pagos",
+      "claves": ["circuit breaker", "proveedor", "pagos"]
+    },
+    {
+      "id": "P2",
+      "descripcion": "Quién hace el diseño de la pantalla de configuración de SSO",
+      "claves": ["diseno", "pantalla", "sso"]
+    },
+    {
+      "id": "P3",
+      "descripcion": "Análisis con finanzas del nuevo plan de precios",
+      "claves": ["analisis", "finanzas", "precios"]
+    },
+    {
+      "id": "P4",
+      "descripcion": "Runbook de rotación de claves",
+      "claves": ["runbook", "rotacion", "claves"]
+    },
+    {
+      "id": "P5",
+      "descripcion": "Experimento A/B para medir si mejorar el LCP mueve la conversión",
+      "claves": ["experimento", "lcp", "conversion"]
+    },
+    {
+      "id": "P6",
+      "descripcion": "Migración de Webpack a Vite",
+      "claves": ["webpack", "vite", "migracion"]
+    }
+  ],
+  "no_debe_salir": [
+    {
+      "id": "N1",
+      "descripcion": "Dar un crédito o descuento a los clientes afectados",
+      "claves": ["credito", "descuento", "clientes afectados"]
+    },
+    {
+      "id": "N2",
+      "descripcion": "Pasar a Postgres 17",
+      "claves": ["postgres 17", "migracion"]
+    },
+    {
+      "id": "N3",
+      "descripcion": "Actualizar la dependencia vulnerable del front y activar Dependabot (ya lo hizo Tomás)",
+      "claves": ["dependencia vulnerable", "front", "dependabot"]
+    },
+    {
+      "id": "N4",
+      "descripcion": "Devolver los 29 cobros duplicados (finanzas ya los devolvió)",
+      "claves": ["devolver", "cobros duplicados", "29"]
+    },
+    {
+      "id": "N5",
+      "descripcion": "Una tarea para el responsable de no usar el MRR del dashboard fuera de la empresa (es una instrucción, no un compromiso)",
+      "claves": ["mrr", "dashboard", "fuera empresa"]
+    },
+    {
+      "id": "N6",
+      "descripcion": "Que Nerea presente con números viejos si el 3 no hay datos",
+      "claves": ["nerea", "numeros viejos", "datos"]
+    },
+    {
+      "id": "N7",
+      "descripcion": "Que Tomás monte la pantalla de SSO con componentes existentes",
+      "claves": ["tomas", "pantalla sso", "componentes existentes"]
+    }
+  ],
+  "no_esperadas_discutibles": [
+    {
+      "id": "D1",
+      "descripcion": "QBR de Nerea el jueves 5 (es un evento que ya tiene, no un compromiso nuevo)",
+      "claves": ["qbr", "nerea", "jueves 5"]
+    },
+    {
+      "id": "D2",
+      "descripcion": "Una fecha de compromiso para el SSO de Atlas (no me voy a comprometer a una fecha hoy)",
+      "claves": ["fecha compromiso", "sso", "atlas"]
+    }
+  ]
+}
