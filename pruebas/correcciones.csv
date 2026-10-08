@@ -1,0 +1,3 @@
+ejecucion,fila,resultado_final,motivo
+claude-opus-5-5/teams-sin-p2,9,acierto,"La tarea corresponde a la fila 9, no a la fila 8."
+claude-haiku-4-5-20251001/corrido-sin-p2,P2,acierto,"El pendiente es correcto: menciona SAML en vez de SSO."

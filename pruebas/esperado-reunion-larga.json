@@ -12,11 +12,16 @@
       "Álvaro"
     ]
   },
+  "nombres_con_errata": [
+    { "errata": "Marino", "corregido": "Marina" },
+    { "errata": "Clarra", "corregido": "Clara" }
+  ],
+  "mencionados_no_participantes": ["Paloma"],
   "tareas": [
     {
       "id": 1,
       "descripcion": "Llamar a los dos clientes con tarjeta caducada (otro método de pago o IBAN)",
-      "claves": ["clientes", "tarjeta caducada", "iban"],
+      "claves": ["llamar", "clientes"],
       "responsable": "Nerea",
       "dificil_sin_etiquetas": false,
       "fechas_aceptadas": ["2026-10-27"],
@@ -27,6 +32,7 @@
       "id": 2,
       "descripcion": "Idempotencia (Idempotency-Key) y backoff con jitter en el worker de cobros",
       "claves": ["idempotencia", "backoff", "jitter"],
+      "division_admitida": [["idempotencia"], ["backoff"]],
       "responsable": "Andrés",
       "dificil_sin_etiquetas": false,
       "fechas_aceptadas": ["2026-11-06"],
@@ -66,7 +72,7 @@
     {
       "id": 6,
       "descripcion": "Purgar los logs con la clave de API en texto plano",
-      "claves": ["purgar", "logs", "texto plano"],
+      "claves": ["purgar", "logs", "clave"],
       "responsable": "Marina",
       "dificil_sin_etiquetas": false,
       "fechas_aceptadas": ["2026-10-27"],
@@ -76,7 +82,7 @@
     {
       "id": 7,
       "descripcion": "Rotar la clave de API del proveedor de pagos",
-      "claves": ["rotar", "clave api", "pagos"],
+      "claves": ["rotar", "clave", "pagos"],
       "responsable": "Álvaro",
       "dificil_sin_etiquetas": false,
       "fechas_aceptadas": ["2026-10-30"],
@@ -127,6 +133,7 @@
       "id": 12,
       "descripcion": "Borrar audit_tmp y configurar REPLICA IDENTITY FULL en events_raw y legacy_imports",
       "claves": ["audit_tmp", "replica identity full", "events_raw"],
+      "division_admitida": [["audit_tmp"], ["replica identity"]],
       "responsable": "Clara",
       "dificil_sin_etiquetas": true,
       "fechas_aceptadas": ["2026-11-04"],
@@ -136,7 +143,7 @@
     {
       "id": 13,
       "descripcion": "Probar Debezium con Postgres 16 en staging y confirmar",
-      "claves": ["debezium", "postgres 16", "staging"],
+      "claves": ["debezium", "staging"],
       "responsable": "Clara",
       "dificil_sin_etiquetas": false,
       "fechas_aceptadas": ["2026-11-06"],
@@ -156,7 +163,7 @@
     {
       "id": 15,
       "descripcion": "Enviar a Julián el borrador del aviso por correo",
-      "claves": ["borrador", "aviso", "correo"],
+      "claves": ["aviso", "julian"],
       "responsable": "Nerea",
       "dificil_sin_etiquetas": false,
       "fechas_aceptadas": ["2026-10-28"],
@@ -206,7 +213,7 @@
     {
       "id": 20,
       "descripcion": "Apoyo en la guardia de la noche del corte",
-      "claves": ["apoyo", "guardia", "corte"],
+      "claves": ["apoyo"],
       "responsable": "Andrés",
       "dificil_sin_etiquetas": false,
       "fechas_aceptadas": ["2026-11-14"],
@@ -216,7 +223,7 @@
     {
       "id": 21,
       "descripcion": "Corregir el join de fct_subscriptions y recalcular el histórico",
-      "claves": ["fct_subscriptions", "join", "historico"],
+      "claves": ["fct_subscriptions", "historico"],
       "responsable": "Clara",
       "dificil_sin_etiquetas": false,
       "fechas_aceptadas": ["2026-11-03"],
@@ -226,7 +233,7 @@
     {
       "id": 22,
       "descripcion": "Enseñar los números corregidos a Paloma (finanzas) para validarlos",
-      "claves": ["numeros corregidos", "paloma", "finanzas"],
+      "claves": ["paloma", "finanzas"],
       "responsable": "Clara",
       "dificil_sin_etiquetas": false,
       "fechas_aceptadas": ["2026-11-03"],
@@ -236,7 +243,7 @@
     {
       "id": 23,
       "descripcion": "Límite de intentos en el API gateway (10 por minuto por IP)",
-      "claves": ["intentos", "api gateway", "ip"],
+      "claves": ["intentos", "gateway"],
       "responsable": "Marina",
       "dificil_sin_etiquetas": false,
       "fechas_aceptadas": ["2026-11-04"],
@@ -256,7 +263,7 @@
     {
       "id": 25,
       "descripcion": "Quitar el stack trace de los errores 500",
-      "claves": ["stack trace", "errores", "500"],
+      "claves": ["stack"],
       "responsable": "Andrés",
       "dificil_sin_etiquetas": false,
       "fechas_aceptadas": ["2026-10-28"],
@@ -276,7 +283,7 @@
     {
       "id": 27,
       "descripcion": "Carga diferida de la librería de gráficos",
-      "claves": ["carga diferida", "libreria", "graficos"],
+      "claves": ["diferida", "graficos"],
       "responsable": "Tomás",
       "dificil_sin_etiquetas": false,
       "fechas_aceptadas": ["2026-10-30"],
@@ -286,7 +293,7 @@
     {
       "id": 28,
       "descripcion": "Comentar el documento de arquitectura de la migración",
-      "claves": ["comentar", "arquitectura", "migracion"],
+      "claves": ["documento", "arquitectura", "migracion"],
       "responsable": "todos",
       "dificil_sin_etiquetas": false,
       "fechas_aceptadas": ["2026-11-02"],
@@ -298,12 +305,12 @@
     {
       "id": "P1",
       "descripcion": "Circuit breaker para las llamadas al proveedor de pagos",
-      "claves": ["circuit breaker", "proveedor", "pagos"]
+      "claves": ["circuit breaker"]
     },
     {
       "id": "P2",
       "descripcion": "Quién hace el diseño de la pantalla de configuración de SSO",
-      "claves": ["diseno", "pantalla", "sso"]
+      "claves": ["diseno", "sso"]
     },
     {
       "id": "P3",
@@ -318,12 +325,12 @@
     {
       "id": "P5",
       "descripcion": "Experimento A/B para medir si mejorar el LCP mueve la conversión",
-      "claves": ["experimento", "lcp", "conversion"]
+      "claves": ["lcp", "conversion"]
     },
     {
       "id": "P6",
       "descripcion": "Migración de Webpack a Vite",
-      "claves": ["webpack", "vite", "migracion"]
+      "claves": ["vite"]
     }
   ],
   "no_debe_salir": [
@@ -373,6 +380,11 @@
       "id": "D2",
       "descripcion": "Una fecha de compromiso para el SSO de Atlas (no me voy a comprometer a una fecha hoy)",
       "claves": ["fecha compromiso", "sso", "atlas"]
+    },
+    {
+      "id": "D3",
+      "descripcion": "No usar el MRR del dashboard fuera de la empresa (es una instrucción, no un compromiso)",
+      "claves": ["mrr", "dashboard"]
     }
   ]
 }
