@@ -14,18 +14,16 @@ Cada tarea sale con su responsable, su fecha límite, un nivel de certeza (alta,
 
 Los **pendientes** van en otra tabla: cosas que se mencionaron ("habría que...", "alguien debería...") sin responsable o aplazadas sin fecha.
 
-Se puede copiar el resultado, descargarlo en CSV, copiarlo para pegarlo en Google Sheets o exportarlo a PowerPoint. Hay un campo opcional para escribir los nombres de los participantes: sirve para que, si el transcriptor ha escrito mal un nombre ("Marino" por Marina), la herramienta use el correcto. Y, como muestran las pruebas, mejora mucho el resultado cuando la transcripción no dice quién habla.
+Se puede copiar el resultado, descargarlo en CSV, copiarlo para pegarlo en Google Sheets o exportarlo a PowerPoint. Hay un campo opcional para escribir los nombres de los participantes que sirve para que, si el transcriptor ha escrito mal un nombre ("Marino" por Marina, por ejemplo), la herramienta use el correcto. Y, como muestran las pruebas, mejora mucho el resultado cuando la transcripción no dice quién habla.
 
 ## El flujo completo: de la reunión a Jira
 
-La web sirve para usarla a mano. Para que no haga falta, monté una automatización con Make:
+La web sirve para usarla a mano, pero para que no haga falta, monté una automatización con Make para poder conectarla con Jira:
 
-1. **Google Drive:** Meet (en las cuentas de pago) guarda la transcripción como documento en Drive. Make vigila esa carpeta. En mis pruebas lo simulé creando yo el Google Doc.
-2. **Filtro:** solo continúa si el archivo es un Google Doc.
+1. **Google Drive:** Meet (en las cuentas de pago) guarda la transcripción automáticamente tras terminar la reunión como documento en Drive. Make vigila esa carpeta. En mis pruebas lo simulé creando yo el Google Doc., al no tener cuenta de pago.
+2. **Filtro:** solo continúa si el archivo es un Google Doc. (para evitar que se cuele la grabación MP4 de la reunión).
 3. **Extractor:** Make envía el texto a la misma función que usa la web.
-4. **Jira:** crea una incidencia por tarea, con su fecha de vencimiento, y una por pendiente, con la etiqueta `sin-asignar`. Todas llevan además la etiqueta `ia-revisar`.
-
-La etiqueta `ia-revisar` es deliberada: nada de lo que crea la IA debería darse por bueno sin que alguien lo mire. Descarté construir un tablero propio dentro de la web porque el equipo ya trabaja en Jira; la herramienta debe alimentar el sistema real, no sustituirlo.
+4. **Jira:** crea una incidencia por tarea, con su fecha de vencimiento, y una por pendiente, con la etiqueta "sin-asignar". Todas llevan además la etiqueta "ia-revisar", para saber diferenciar las creadas manualmente de las creadas con la automatización, para que las segundas puedan revisarse y ser validadas por una persona. 
 
 ## Cómo lo probé
 
@@ -37,7 +35,7 @@ Pruebas hechas el 7 de octubre de 2026 sobre la versión `v1.0-pruebas` (commit 
 - **Cinco configuraciones:** formato Meet, Teams y Otter (hablantes numerados, sin nombres), y texto corrido sin puntuación ni hablantes, sin y con lista de participantes. Los formatos imitan a los reales, pero son aproximados.
 - **Dos modelos:** Claude Opus 5.5 (el que usa la web) y Claude Haiku 4.5 (unas 7 veces más barato).
 - **Tres pasadas** de cada combinación, porque la IA no responde siempre igual: 30 ejecuciones en total, lanzadas con un script ([`pruebas/ejecutar.js`](pruebas/ejecutar.js)) para que todas fueran idénticas.
-- **Mismas condiciones para los dos modelos:** no fijé la temperatura ni el parámetro `effort`. En Opus 5.5, no enviar `effort` equivale al valor que usa la web (`medium`), y Haiku 4.5 no lo admite.
+- **Mismas condiciones para los dos modelos:** no fijé la temperatura ni el parámetro "effort". En Opus 5.5, no enviar "effort" equivale al valor que usa la web ("medium"), y Haiku 4.5 no lo admite.
 - **Puntuación** con un segundo script ([`pruebas/puntuar.js`](pruebas/puntuar.js)), que compara cada resultado con lo esperado, y **revisión manual** de las discrepancias.
 
 ### Resultados
