@@ -29,7 +29,7 @@ La web sirve para usarla a mano, pero para que no haga falta, monté una automat
 
 ### Método
 
-Pruebas hechas el 7 de octubre de 2026 sobre la versión `v1.0-pruebas` (commit 9b3998d). Los criterios de acierto los escribí **antes** de lanzar ninguna prueba y están en [`pruebas/esperado-reunion-larga.md`](pruebas/esperado-reunion-larga.md) (commit 20e111b).
+Pruebas hechas el 7 de octubre de 2026 sobre la versión `v1.0-pruebas` (commit [9b3998d](https://github.com/luciam-git/extractor-de-tareas/commit/9b3998d)). Los criterios de acierto los escribí **antes** de lanzar ninguna prueba y están en [`pruebas/esperado-reunion-larga.md`](pruebas/esperado-reunion-larga.md) (commit [20e111b](https://github.com/luciam-git/extractor-de-tareas/commit/20e111b)).
 
 - **La reunión de prueba** es inventada, para conocer de antemano la solución. Tiene ocho personas, explicaciones técnicas, correcciones de fecha, gente que se va a mitad, tareas ya hechas o canceladas y nombres mal transcritos. Conté a mano **28 tareas y 6 pendientes** que deberían salir, y anoté lo que **no** debería salir.
 - **Cinco configuraciones:** formato Meet, Teams y Otter (hablantes numerados, sin nombres), y texto corrido sin puntuación ni hablantes, sin y con lista de participantes. Los formatos imitan a los reales, pero son aproximados.
